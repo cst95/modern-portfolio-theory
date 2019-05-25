@@ -11,38 +11,28 @@ def show_data(data):
     plt.show()
     return None
 
-def calculate_returns(data):
-    return np.log(data / data.shift(1))
-
-
-def calculate_portfolio_return(returns, weights):
-    return np.sum((returns.mean() * weights)) * 252
-
-def calculate_portfolio_variance(returns, weights):
-    return np.sqrt(np.dot(np.array(weights).T, np.dot(returns.cov() * 252, weights))) 
 
 if __name__ == '__main__':
     stocks = ['AAPL','WMT','TSLA','GE','AMZN','DB']
 
-    start = pd.to_datetime('2014-01-01') 
-    end = pd.to_datetime('2019-01-01')
+    start = '2014-01-01'
+    end = '2019-01-01'
 
     data = StockData(stocks, start, end)
 
-    adj_close = data.get('adj close')
-    daily_returns = calculate_returns(adj_close)
-    
+    daily_returns = data.log_returns
+
     portfolio_returns = []
     portfolio_variances = []
 
     for i in range(10000):
         p = Portfolio(stocks)
 
-        portfolio_return = calculate_portfolio_return(daily_returns, p.weights)
-        portfolio_variance = calculate_portfolio_variance(daily_returns, p.weights)
+        p_return = p.calculate_return(daily_returns)
+        p_variance = p.calculate_volatility(daily_returns)
 
-        portfolio_returns.append(portfolio_return)
-        portfolio_variances.append(portfolio_variance)
+        portfolio_returns.append(p_return)
+        portfolio_variances.append(p_variance)
 
     preturns = np.array(portfolio_returns)
     pvariances = np.array(portfolio_variances)
